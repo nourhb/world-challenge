@@ -35,4 +35,4 @@ COPY --from=build /app/frontend/dist ./frontend/dist
 WORKDIR /app/backend
 ENV CLIENT_DIR=/app/frontend/dist
 EXPOSE 5000
-CMD ["sh", "-c", "npx prisma migrate deploy && npx prisma db seed && node dist/main.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
