@@ -12,6 +12,8 @@ import type {
   HealthStatus,
   MeUser,
   PassportView,
+  PasswordResetRequestResult,
+  PasswordResetResult,
   PublicUser,
 } from '@world-challenge/shared';
 import { useAuthStore } from '../features/auth/auth-store';
@@ -131,6 +133,25 @@ export function loginAccount(body: {
   password: string;
 }): Promise<AuthTokens> {
   return request<AuthTokens>('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export function requestPasswordReset(body: {
+  identifier: string;
+}): Promise<PasswordResetRequestResult> {
+  return request<PasswordResetRequestResult>('/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export function resetPassword(body: {
+  token: string;
+  password: string;
+}): Promise<PasswordResetResult> {
+  return request<PasswordResetResult>('/auth/reset-password', {
     method: 'POST',
     body: JSON.stringify(body),
   });

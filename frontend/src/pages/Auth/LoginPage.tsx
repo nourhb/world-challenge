@@ -12,6 +12,10 @@ export function LoginPage() {
   const location = useLocation();
   const setSession = useAuthStore((state) => state.setSession);
   const [serverError, setServerError] = useState<string | null>(null);
+  const resetNotice =
+    typeof location.state === 'object' &&
+    location.state !== null &&
+    'passwordReset' in location.state;
   const geoQuery = useQuery({
     queryKey: ['geo-location'],
     queryFn: getGeoLocation,
@@ -54,6 +58,11 @@ export function LoginPage() {
         <p className="mt-3 text-sm text-mist">
           Username or email plus password. Session cookies stay on this app origin.
         </p>
+        {resetNotice ? (
+          <p className="mt-3 rounded-2xl border border-cyan/30 bg-cyan/10 px-4 py-3 text-sm">
+            Password updated. Sign in with the new one.
+          </p>
+        ) : null}
         {geoQuery.data?.country ? (
           <p className="mt-3 rounded-2xl border border-cyan/30 bg-cyan/10 px-4 py-3 text-sm">
             This network looks like {geoQuery.data.country.flagEmoji}{' '}
@@ -82,6 +91,11 @@ export function LoginPage() {
           />
         </label>
         <FieldError message={form.formState.errors.password?.message} />
+        <p className="mt-2 text-right text-sm">
+          <Link to="/forgot-password" className="text-cyan">
+            Forgot password?
+          </Link>
+        </p>
 
         {serverError ? <p className="mt-4 text-sm text-ember">{serverError}</p> : null}
 

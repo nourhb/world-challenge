@@ -129,3 +129,12 @@ export interface DiscoverUsersPage {
   items: PublicUser[];
   total: number;
 }
+
+export interface PasswordResetRequestResult {
+  message: string;
+  resetUrl?: string;
+}
+
+export interface PasswordResetResult {
+  reset: true;
+}

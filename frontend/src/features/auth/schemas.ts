@@ -30,8 +30,25 @@ export const loginSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
+export const forgotPasswordSchema = z.object({
+  identifier: z.string().min(3, 'Enter your username or email'),
+});
+
+export const resetPasswordSchema = z
+  .object({
+    token: z.string().min(32, 'This reset link is missing or incomplete'),
+    password: z.string().min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z.string().min(8, 'Confirm your password'),
+  })
+  .refine((values) => values.password === values.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
+
 export type RegisterValues = z.infer<typeof registerSchema>;
 export type LoginValues = z.infer<typeof loginSchema>;
+export type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
 
 export function isAdult(dateOfBirth: string, now = new Date()): boolean {
   const birth = new Date(`${dateOfBirth}T00:00:00.000Z`);

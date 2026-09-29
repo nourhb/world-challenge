@@ -1,12 +1,19 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import type { AuthTokens, MeUser } from '@world-challenge/shared';
+import type {
+  AuthTokens,
+  MeUser,
+  PasswordResetRequestResult,
+  PasswordResetResult,
+} from '@world-challenge/shared';
 import * as argon2 from 'argon2';
 import { createHash, randomBytes } from 'crypto';
 import type { Response } from 'express';
@@ -16,10 +23,14 @@ import type { LoginDto } from './dto/login.dto';
 import type { RegisterDto } from './dto/register.dto';
 import { GeoIpService } from './geo-ip.service';
 import { extractClientIp } from './geo-ip.util';
+import { publicSiteUrl } from '../common/public-url';
 
 export const REFRESH_COOKIE = 'wc_refresh';
 const ACCESS_TTL_SECONDS = 15 * 60;
 const REFRESH_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const RESET_TTL_MS = 30 * 60 * 1000;
+const GENERIC_RESET_MESSAGE =
+  'If an account exists for that username or email, a reset link is ready.';
 
 export interface RequestMeta {
   headers: Record<string, unknown>;
@@ -28,6 +39,8 @@ export interface RequestMeta {
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
@@ -130,6 +143,88 @@ export class AuthService {
     }
 
     return this.issueSession(user.id, response, requestMeta);
+  }
+
+  async requestPasswordReset(
+    identifier: string,
+  ): Promise<PasswordResetRequestResult> {
+    const trimmed = identifier.trim();
+    const user = await this.prisma.user.findFirst({
+      where: {
+        deletedAt: null,
+        isSuspended: false,
+        OR: [
+          { email: trimmed.toLowerCase() },
+          { username: { equals: trimmed, mode: 'insensitive' } },
+        ],
+      },
+    });
+
+    if (!user) {
+      return { message: GENERIC_RESET_MESSAGE };
+    }
+
+    await this.prisma.passwordResetToken.updateMany({
+      where: { userId: user.id, usedAt: null },
+      data: { usedAt: new Date() },
+    });
+
+    const rawToken = randomBytes(32).toString('hex');
+    await this.prisma.passwordResetToken.create({
+      data: {
+        userId: user.id,
+        tokenHash: hashToken(rawToken),
+        expiresAt: new Date(Date.now() + RESET_TTL_MS),
+      },
+    });
+
+    const frontendUrl = publicSiteUrl();
+    const resetUrl = `${frontendUrl}/reset-password?token=${rawToken}`;
+    this.logger.log(`Password reset created for ${user.username}`);
+
+    if (this.config.get<string>('NODE_ENV') === 'production') {
+      return { message: GENERIC_RESET_MESSAGE };
+    }
+
+    return { message: GENERIC_RESET_MESSAGE, resetUrl };
+  }
+
+  async resetPassword(
+    rawToken: string,
+    password: string,
+  ): Promise<PasswordResetResult> {
+    const stored = await this.prisma.passwordResetToken.findUnique({
+      where: { tokenHash: hashToken(rawToken) },
+      include: { user: true },
+    });
+
+    if (
+      !stored ||
+      stored.usedAt ||
+      stored.expiresAt.getTime() < Date.now() ||
+      stored.user.deletedAt ||
+      stored.user.isSuspended
+    ) {
+      throw new BadRequestException('This reset link is invalid or has expired');
+    }
+
+    const passwordHash = await argon2.hash(password, { type: argon2.argon2id });
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: stored.userId },
+        data: { passwordHash },
+      }),
+      this.prisma.passwordResetToken.update({
+        where: { id: stored.id },
+        data: { usedAt: new Date() },
+      }),
+      this.prisma.refreshToken.updateMany({
+        where: { userId: stored.userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      }),
+    ]);
+
+    return { reset: true };
   }
 
   async refresh(rawToken: string | undefined, response: Response): Promise<AuthTokens> {
@@ -251,7 +346,7 @@ export class AuthService {
     response.cookie(REFRESH_COOKIE, token, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: isProduction ? 'none' : 'lax',
+      sameSite: 'lax',
       path: '/',
       maxAge: REFRESH_TTL_MS,
     });
@@ -262,7 +357,7 @@ export class AuthService {
     response.clearCookie(REFRESH_COOKIE, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: isProduction ? 'none' : 'lax',
+      sameSite: 'lax',
       path: '/',
     });
   }

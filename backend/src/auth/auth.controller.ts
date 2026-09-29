@@ -1,14 +1,22 @@
 import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import type { AuthTokens, GeoLocation, MeUser } from '@world-challenge/shared';
+import type {
+  AuthTokens,
+  GeoLocation,
+  MeUser,
+  PasswordResetRequestResult,
+  PasswordResetResult,
+} from '@world-challenge/shared';
 import type { Request, Response } from 'express';
 import { CurrentUser } from '../common/auth/current-user.decorator';
 import { JwtAuthGuard } from '../common/auth/jwt-auth.guard';
 import type { AuthUser } from '../common/auth/auth-user';
 import { AuthService, REFRESH_COOKIE } from './auth.service';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { GeoIpService } from './geo-ip.service';
 
 @ApiTags('auth')
@@ -48,6 +56,22 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ): Promise<AuthTokens> {
     return this.authService.login(dto, response, requestMeta(request));
+  }
+
+  @Post('forgot-password')
+  @Throttle({ default: { limit: 5, ttl: 3_600_000 } })
+  @ApiOperation({ summary: 'Start a password reset for a username or email' })
+  forgotPassword(
+    @Body() dto: ForgotPasswordDto,
+  ): Promise<PasswordResetRequestResult> {
+    return this.authService.requestPasswordReset(dto.identifier);
+  }
+
+  @Post('reset-password')
+  @Throttle({ default: { limit: 8, ttl: 3_600_000 } })
+  @ApiOperation({ summary: 'Set a new password with a reset token' })
+  resetPassword(@Body() dto: ResetPasswordDto): Promise<PasswordResetResult> {
+    return this.authService.resetPassword(dto.token, dto.password);
   }
 
   @Post('refresh')

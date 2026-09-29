@@ -62,8 +62,9 @@ model User {
   updatedAt            DateTime  @updatedAt
 
   country          Country           @relation(fields: [countryId], references: [id])
-  refreshTokens    RefreshToken[]
-  userCountries    UserCountry[]
+  refreshTokens         RefreshToken[]
+  passwordResetTokens   PasswordResetToken[]
+  userCountries         UserCountry[]
   gamePlayers      GamePlayer[]
   hostedSessions   GameSession[]     @relation("SessionHost")
   invitedSessions  GameSession[]     @relation("SessionInvitee")
@@ -83,6 +84,20 @@ model RefreshToken {
   tokenHash String    @unique
   expiresAt DateTime
   revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
   createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

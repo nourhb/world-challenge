@@ -4,7 +4,7 @@ A social cultural-discovery game. Players meet people from other countries, play
 
 This repository now has a **usable vertical slice**: real auth, real countries, real discover, Country Quiz (solo + 1v1), server-side scoring, XP, and passport unlocks.
 
-## How to run
+## How to run locally
 
 ```bash
 copy backend\.env.example backend\.env
@@ -24,6 +24,20 @@ npm run dev:frontend
 - Swagger: http://localhost:5000/swagger
 
 PostgreSQL is on host port **5433**. User / password / database: `worldchallenge`.
+
+## Go live
+
+Production is **one HTTPS service**: Nest serves the API, Socket.IO, and the built React app from the same origin (so login cookies work). Postgres is on Neon.
+
+1. The production database is the Neon project **world-challenge**. Copy its connection string from [Neon Console](https://console.neon.tech).
+2. Open the GitHub repo and deploy with Render Blueprint:
+
+   [Deploy to Render](https://render.com/deploy?repo=https://github.com/nourhb/world-challenge)
+
+3. Paste `DATABASE_URL` when Render asks. Leave JWT secrets on **generate**.
+4. After the first deploy, open the Render URL. Demo logins still work: **Nour** / **Alex**, password `DemoPass123!`.
+
+The Docker image runs `prisma migrate deploy` and seed on boot, then `node dist/main.js`.
 
 ## Demo logins
 

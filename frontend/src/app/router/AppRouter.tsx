@@ -3,8 +3,10 @@ import { AppShell } from '../../components/layout/AppShell';
 import { GuestOnly } from '../../features/auth/GuestOnly';
 import { ProtectedRoute } from '../../features/auth/ProtectedRoute';
 import { useAuthStore } from '../../features/auth/auth-store';
+import { ForgotPasswordPage } from '../../pages/Auth/ForgotPasswordPage';
 import { LoginPage } from '../../pages/Auth/LoginPage';
 import { RegisterPage } from '../../pages/Auth/RegisterPage';
+import { ResetPasswordPage } from '../../pages/Auth/ResetPasswordPage';
 import { ComingSoonPage } from '../../pages/ComingSoon/ComingSoonPage';
 import { DiscoverPage } from '../../pages/Discover/DiscoverPage';
 import { GameSessionPage } from '../../pages/Games/GameSessionPage';
@@ -36,6 +38,8 @@ export function AppRouter() {
           <Route element={<GuestOnly />}>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
           </Route>
           <Route element={<ProtectedRoute />}>
             <Route path="/discover" element={<DiscoverPage />} />
