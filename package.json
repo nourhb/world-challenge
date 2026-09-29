@@ -1,0 +1,28 @@
+{
+  "name": "world-challenge",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Social cultural-discovery game with a virtual passport",
+  "workspaces": [
+    "shared",
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "build": "npm run build -w @world-challenge/shared && npm run build -w backend && npm run build -w frontend",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "dev:backend": "npm run start:dev -w backend",
+    "dev:frontend": "npm run dev -w frontend",
+    "db:generate": "npm run prisma:generate -w backend",
+    "db:migrate": "npm run prisma:migrate -w backend",
+    "db:seed": "npm run prisma:seed -w backend"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "overrides": {
+    "three": "0.186.1"
+  }
+}

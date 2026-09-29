@@ -1,0 +1,140 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color: #e8f1f4;
+  background: #04060c;
+  font-family: Outfit, system-ui, sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  border-color: rgba(138, 160, 181, 0.22);
+}
+
+html,
+body {
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #04060c;
+}
+
+#root {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+}
+
+.neon-stage {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+.neon-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.neon-canvas canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.uv-haze {
+  position: absolute;
+  inset: -12%;
+  background:
+    radial-gradient(ellipse at 18% 12%, rgba(255, 43, 214, 0.2), transparent 42%),
+    radial-gradient(ellipse at 82% 18%, rgba(139, 92, 255, 0.2), transparent 40%),
+    radial-gradient(ellipse at 50% 88%, rgba(62, 224, 197, 0.14), transparent 48%),
+    radial-gradient(ellipse at 70% 60%, rgba(242, 193, 75, 0.06), transparent 36%);
+  animation: uvDrift 16s ease-in-out infinite alternate;
+  mix-blend-mode: screen;
+}
+
+.uv-static-orbits {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 46%, transparent 16%, rgba(62, 224, 197, 0.08) 17%, transparent 18%),
+    radial-gradient(circle at 50% 46%, transparent 22%, rgba(255, 43, 214, 0.08) 23%, transparent 24%),
+    radial-gradient(circle at 50% 46%, rgba(139, 92, 255, 0.12), transparent 28%);
+}
+
+.uv-scan {
+  position: absolute;
+  inset: 0;
+  opacity: 0.16;
+  mix-blend-mode: screen;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    rgba(255, 43, 214, 0.09) 3px
+  );
+  animation: uvScan 7s linear infinite;
+}
+
+.uv-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at center, transparent 38%, rgba(4, 6, 12, 0.55) 78%, rgba(4, 6, 12, 0.88) 100%);
+}
+
+@keyframes uvDrift {
+  0% {
+    transform: translate3d(-2%, -1%, 0) scale(1);
+    filter: hue-rotate(0deg) saturate(1.15);
+  }
+  100% {
+    transform: translate3d(3%, 2%, 0) scale(1.08);
+    filter: hue-rotate(28deg) saturate(1.4);
+  }
+}
+
+@keyframes uvScan {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(12px);
+  }
+}
+
+[class*='rounded-[28px]'],
+[class*='rounded-[24px]'] {
+  backdrop-filter: blur(16px) saturate(1.25);
+  box-shadow:
+    0 0 0 1px rgba(255, 43, 214, 0.12),
+    0 0 28px rgba(62, 224, 197, 0.08);
+}
+
+.bg-panel\/80,
+.bg-panel\/70 {
+  background-color: rgb(16 26 38 / 0.46) !important;
+}
+
+:focus-visible {
+  outline: 2px solid #ff2bd6;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
