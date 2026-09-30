@@ -123,6 +123,12 @@ export class GameGateway implements OnGatewayConnection {
         body.answer,
       );
       client.emit('game:answer_result', result);
+      if (result.accepted) {
+        this.server.to(roomName(sessionId)).emit('game:lock_in', {
+          userId,
+          questionId: body.questionId,
+        });
+      }
       if (result.allPlayersAnswered) {
         await this.closeRound(sessionId);
       }

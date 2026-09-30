@@ -1,5 +1,6 @@
 import type { Prisma } from '@prisma/client';
 import {
+  currentCombo,
   GameMode,
   GameStatus,
   GameType,
@@ -18,6 +19,7 @@ type SessionRecord = Prisma.GameSessionGetPayload<{
         user: { include: { country: true } };
       };
     };
+    answers: true;
   };
 }>;
 
@@ -26,12 +28,19 @@ type QuestionRecord = {
   prompt: string;
   options: Prisma.JsonValue;
   imageUrl: string | null;
+  difficulty: number;
 };
 
 export function toGameSessionView(
   session: SessionRecord,
   currentQuestion: QuestionRecord | null,
 ): GameSessionView {
+  const currentQuestionId =
+    session.status === GameStatus.PLAYING ||
+    session.status === GameStatus.ROUND_COMPLETE
+      ? (session.questionIds[session.currentRound - 1] ?? null)
+      : null;
+
   return {
     id: session.id,
     gameType: session.game.type as GameType,
@@ -43,7 +52,9 @@ export function toGameSessionView(
     totalRounds: session.questionIds.length,
     hostUserId: session.hostUserId,
     invitedUserId: session.invitedUserId,
-    players: session.players.map(toPlayerView),
+    players: session.players.map((player) =>
+      toPlayerView(player, session.answers, currentQuestionId),
+    ),
     currentQuestion:
       currentQuestion && session.roundEndsAt
         ? toPublicQuestion(
@@ -78,10 +89,19 @@ export function toPublicQuestion(
     totalRounds,
     timeLimitMs,
     endsAt: endsAt.toISOString(),
+    difficulty: question.difficulty,
   };
 }
 
-export function toPlayerView(player: SessionRecord['players'][number]): GamePlayerView {
+export function toPlayerView(
+  player: SessionRecord['players'][number],
+  answers: SessionRecord['answers'],
+  currentQuestionId: string | null,
+): GamePlayerView {
+  const ordered = answers
+    .filter((answer) => answer.playerId === player.userId)
+    .sort((left, right) => left.createdAt.getTime() - right.createdAt.getTime());
+
   return {
     userId: player.userId,
     username: player.user.username,
@@ -91,6 +111,10 @@ export function toPlayerView(player: SessionRecord['players'][number]): GamePlay
     score: player.score,
     ready: player.ready,
     xpAwarded: player.xpAwarded,
+    combo: currentCombo(ordered.map((answer) => answer.isCorrect)),
+    answeredThisRound: currentQuestionId
+      ? ordered.some((answer) => answer.questionId === currentQuestionId)
+      : false,
   };
 }
 

@@ -110,6 +110,34 @@ body {
   }
 }
 
+.timer-track {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.timer-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #3ee0c5, #8b5cff);
+  transition: width 250ms linear;
+}
+
+.timer-fill-hot {
+  background: linear-gradient(90deg, #ff6b6b, #ff2bd6);
+}
+
+.combo-chip {
+  text-shadow: 0 0 12px rgba(242, 193, 75, 0.55);
+}
+
+.countdown-digit {
+  text-shadow:
+    0 0 24px rgba(62, 224, 197, 0.55),
+    0 0 48px rgba(255, 43, 214, 0.25);
+}
+
 [class*='rounded-[28px]'],
 [class*='rounded-[24px]'] {
   backdrop-filter: blur(16px) saturate(1.25);

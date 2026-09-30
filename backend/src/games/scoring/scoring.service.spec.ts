@@ -36,6 +36,22 @@ describe('ScoringService', () => {
 
     expect(result.difficultyMultiplier).toBe(2);
     expect(result.points).toBe(200);
+    expect(result.combo).toBe(1);
+    expect(result.comboMultiplier).toBe(1);
+  });
+
+  it('applies a combo multiplier on a live streak', () => {
+    const result = service.scoreQuizAnswer({
+      isCorrect: true,
+      responseMs: 0,
+      difficulty: 1,
+      previousStreak: 2,
+      timeLimitMs: 20_000,
+    });
+
+    expect(result.combo).toBe(3);
+    expect(result.comboMultiplier).toBe(1.3);
+    expect(result.points).toBe(195);
   });
 
   it('scores a precise map pin higher than a distant one', () => {

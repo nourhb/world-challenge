@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { GameMode, GameType } from '@world-challenge/shared';
+import { dailyChallengeType, GameMode, GameType } from '@world-challenge/shared';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { PageState } from '../../components/ui/PageState';
@@ -45,7 +45,7 @@ export function GamesPage() {
       <h1 className="mt-2 font-display text-4xl font-extrabold uppercase">Games</h1>
       <p className="mt-2 max-w-2xl text-sm text-mist">
         Eight live modes. Solo to warm up, 1v1 when you want a stamp from someone
-        else’s country. Servers score every answer.
+        else’s country. Later rounds escalate. Streaks multiply the payout.
       </p>
 
       <div className="mt-6 flex max-w-xl gap-2">
@@ -79,15 +79,19 @@ export function GamesPage() {
           <div className="mt-3 grid gap-3 md:grid-cols-2">
             {gamesQuery.data.map((game) => {
               const meta = GAME_META[game.type];
+              const isDaily = game.type === dailyChallengeType();
               return (
                 <article
                   key={game.id}
-                  className="rounded-[24px] border border-white/10 bg-panel/80 p-5"
+                  className={[
+                    'rounded-[24px] border bg-panel/80 p-5',
+                    isDaily ? 'border-magenta/50' : 'border-white/10',
+                  ].join(' ')}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <h3 className="font-display text-lg font-bold">{game.name}</h3>
                     <span className="rounded-full border border-cyan/30 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan">
-                      {meta?.intensity ?? 'Live'}
+                      {isDaily ? 'Daily' : (meta?.intensity ?? 'Live')}
                     </span>
                   </div>
                   <p className="mt-2 text-sm text-mist">{game.description}</p>

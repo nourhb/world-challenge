@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { GameType, QUIZ_ROUND_COUNT } from '@world-challenge/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ScoringService } from '../scoring/scoring.service';
-import type { GameEngine } from './game-engine';
-import { shuffle } from './shuffle';
+import type { GameEngine, ScoredAnswer } from './game-engine';
+import { selectStratifiedQuestionIds } from './select-questions';
 
 @Injectable()
 export class CountryQuizEngine implements GameEngine {
@@ -17,25 +17,15 @@ export class CountryQuizEngine implements GameEngine {
   }
 
   async selectQuestionIds(count = QUIZ_ROUND_COUNT): Promise<string[]> {
-    const questions = await this.prisma.question.findMany({
-      where: { gameType: GameType.COUNTRY_QUIZ, isActive: true },
-      select: { id: true },
-    });
-
-    if (questions.length < count) {
-      throw new NotFoundException(
-        `Country Quiz needs at least ${count} seeded questions`,
-      );
-    }
-
-    return shuffle(questions.map((question) => question.id)).slice(0, count);
+    return selectStratifiedQuestionIds(this.prisma, GameType.COUNTRY_QUIZ, count);
   }
 
   async scoreAnswer(input: {
     questionId: string;
     answer: string;
     responseMs: number;
-  }): Promise<{ isCorrect: boolean; points: number }> {
+    previousStreak: number;
+  }): Promise<ScoredAnswer> {
     const question = await this.prisma.question.findUnique({
       where: { id: input.questionId },
     });
@@ -49,8 +39,9 @@ export class CountryQuizEngine implements GameEngine {
       isCorrect,
       responseMs: input.responseMs,
       difficulty: question.difficulty,
+      previousStreak: input.previousStreak,
     });
-    return { isCorrect, points: scored.points };
+    return { isCorrect, points: scored.points, breakdown: scored };
   }
 }
 

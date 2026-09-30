@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
+import { dailyChallengeType, GameType, RANK_LADDER } from '@world-challenge/shared';
 import { Link } from 'react-router-dom';
 import { StatusBadge } from '../../components/ui/StatusBadge';
+import { GAME_META } from '../../features/games/game-meta';
 import { getHealth } from '../../services/api';
 import { formatPassportProgress } from '../../utils/passport';
 
@@ -77,6 +79,9 @@ export function LandingPage() {
         ? `Servers online · ${healthQuery.data.countriesSeeded} countries loaded`
         : 'API up · database offline';
 
+  const dailyType = dailyChallengeType() as GameType;
+  const dailyMeta = GAME_META[dailyType];
+
   return (
     <main className="mx-auto max-w-6xl px-4 py-6 lg:px-8 lg:py-8">
       <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
@@ -90,8 +95,9 @@ export function LandingPage() {
             <span className="mt-2 block text-cyan">Unlock the passport.</span>
           </h1>
           <p className="mt-5 max-w-xl text-base leading-7 text-mist">
-            Challenge players from other countries in short culture games. Every
-            finished match stamps their country into your book and ranks you up.
+            Challenge players from other countries in short culture games. Streaks multiply
+            payouts. Later rounds get harder. Every finished match stamps their country into
+            your book.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link
@@ -139,14 +145,14 @@ export function LandingPage() {
         </article>
       </section>
 
-      <section className="mt-6 rounded-[28px] border border-white/10 bg-hull/70 p-5">
+      <section className="mt-6 rounded-[28px] border border-magenta/25 bg-hull/70 p-5">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-magenta">
               Daily challenge
             </p>
             <h2 className="mt-1 font-display text-2xl font-extrabold">
-              Stamp a new country today
+              {dailyMeta?.tag ?? 'Live'} · {dailyType.replaceAll('_', ' ')}
             </h2>
           </div>
           <Link
@@ -157,8 +163,8 @@ export function LandingPage() {
           </Link>
         </div>
         <p className="mt-2 max-w-2xl text-sm text-mist">
-          Complete one qualifying game with a player from another country. You
-          do not need to win to unlock the stamp.
+          {dailyMeta?.blurb} Same mode for every pilot until UTC midnight. Combos pay extra.
+          1v1 stamps the other country even if you lose.
         </p>
       </section>
 
@@ -192,9 +198,9 @@ export function LandingPage() {
 
       <section className="mt-6 grid gap-3 md:grid-cols-3">
         {[
-          { label: 'XP', value: '50', detail: 'for finishing a game' },
-          { label: 'Country', value: '+100', detail: 'first discovery bonus' },
-          { label: 'Level', value: 'N²', detail: '100 × N² XP to rank up' },
+          { label: 'Hit', value: '100', detail: 'base points, plus speed' },
+          { label: 'Combo', value: 'x1.75', detail: 'five-hit streak cap' },
+          { label: 'Expert', value: 'x2', detail: 'difficulty 5 multiplier' },
         ].map((stat) => (
           <article
             key={stat.label}
@@ -209,6 +215,22 @@ export function LandingPage() {
             <p className="text-xs text-mist">{stat.detail}</p>
           </article>
         ))}
+      </section>
+
+      <section className="mt-6 rounded-[28px] border border-white/10 bg-panel/70 p-5">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-gold">
+          Rank ladder
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {[...RANK_LADDER].reverse().map((tier) => (
+            <span
+              key={tier.title}
+              className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-mist"
+            >
+              Lv {tier.minLevel}+ {tier.title}
+            </span>
+          ))}
+        </div>
       </section>
     </main>
   );

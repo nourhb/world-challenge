@@ -1,12 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
-import { GameMode, GameType, xpRequiredForLevel } from '@world-challenge/shared';
+import {
+  dailyChallengeType,
+  GameMode,
+  GameType,
+  rankTitle,
+  xpRequiredForLevel,
+} from '@world-challenge/shared';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { PageState } from '../../components/ui/PageState';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { useAuthStore } from '../../features/auth/auth-store';
 import { GAME_META } from '../../features/games/game-meta';
-import { createSession, getGames, getMySessions, getPassport } from '../../services/api';
+import { createSession, getGames, getLeaderboard, getMySessions, getPassport } from '../../services/api';
 
 export function HomePage() {
   const user = useAuthStore((state) => state.user);
@@ -29,6 +35,11 @@ export function HomePage() {
     queryFn: getGames,
     enabled: Boolean(user),
   });
+  const ranksQuery = useQuery({
+    queryKey: ['leaderboard'],
+    queryFn: getLeaderboard,
+    enabled: Boolean(user),
+  });
 
   if (!user) {
     return null;
@@ -43,6 +54,8 @@ export function HomePage() {
       Math.round(((user.xp - currentLevelXp) / (nextLevelXp - currentLevelXp)) * 100),
     ),
   );
+  const dailyType = dailyChallengeType() as GameType;
+  const dailyMeta = GAME_META[dailyType];
 
   async function playSolo(gameType: GameType): Promise<void> {
     setPlayError(null);
@@ -70,7 +83,9 @@ export function HomePage() {
           </p>
           <h1 className="mt-3 font-display text-4xl font-extrabold uppercase leading-[0.95] tracking-tight text-paper md:text-6xl">
             Hello {user.username}.
-            <span className="mt-2 block text-cyan">Level {user.level}</span>
+            <span className="mt-2 block text-cyan">
+              {user.rankTitle ?? rankTitle(user.level)} · Level {user.level}
+            </span>
           </h1>
           <p className="mt-4 text-sm text-mist">
             {user.xp} XP · next rank at {nextLevelXp} XP
@@ -82,10 +97,10 @@ export function HomePage() {
             <button
               type="button"
               disabled={starting}
-              onClick={() => void playSolo(GameType.CULTURE_CODE)}
+              onClick={() => void playSolo(dailyType)}
               className="rounded-2xl bg-gold px-6 py-3.5 font-display text-sm font-extrabold uppercase tracking-[0.14em] text-void shadow-play disabled:opacity-60"
             >
-              {starting ? 'Opening room…' : 'Play Culture Code'}
+              {starting ? 'Opening room…' : `Daily · ${dailyMeta?.tag ?? dailyType}`}
             </button>
             <Link
               to="/games"
@@ -128,6 +143,28 @@ export function HomePage() {
         </article>
       </section>
 
+      <section className="mt-6 rounded-[28px] border border-magenta/25 bg-void/70 p-5">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-magenta">
+              Daily challenge
+            </p>
+            <h2 className="mt-1 font-display text-2xl font-extrabold">
+              {gamesQuery.data?.find((game) => game.type === dailyType)?.name ?? dailyType}
+            </h2>
+            <p className="mt-1 max-w-2xl text-sm text-mist">{dailyMeta?.blurb}</p>
+          </div>
+          <button
+            type="button"
+            disabled={starting}
+            onClick={() => void playSolo(dailyType)}
+            className="rounded-xl bg-magenta px-4 py-2 text-sm font-bold uppercase tracking-wide text-void"
+          >
+            Run it
+          </button>
+        </div>
+      </section>
+
       <section className="mt-6">
         <h2 className="font-display text-xl font-extrabold uppercase tracking-wide">
           Live modes
@@ -154,6 +191,34 @@ export function HomePage() {
                 </button>
               );
             })}
+          </div>
+        ) : null}
+      </section>
+
+      <section className="mt-6">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="font-display text-xl font-extrabold uppercase tracking-wide">
+            Global ranks
+          </h2>
+          <Link to="/leaderboard" className="text-xs font-semibold uppercase tracking-wider text-cyan">
+            Full board
+          </Link>
+        </div>
+        {ranksQuery.data && ranksQuery.data.items.length > 0 ? (
+          <div className="grid gap-2 md:grid-cols-3">
+            {ranksQuery.data.items.slice(0, 3).map((entry) => (
+              <Link
+                key={entry.id}
+                to={`/users/${entry.id}`}
+                className="rounded-2xl border border-white/10 bg-void/60 px-4 py-4 hover:border-cyan/40"
+              >
+                <p className="text-[10px] uppercase tracking-wider text-gold">#{entry.rank}</p>
+                <p className="mt-1 font-display text-lg font-bold">{entry.username}</p>
+                <p className="text-xs text-mist">
+                  {entry.rankTitle} · {entry.xp} XP
+                </p>
+              </Link>
+            ))}
           </div>
         ) : null}
       </section>

@@ -16,6 +16,7 @@ import { LandingPage } from '../../pages/Landing/LandingPage';
 import { PassportPage } from '../../pages/Passport/PassportPage';
 import { ProfilePage } from '../../pages/Profile/ProfilePage';
 import { UserProfilePage } from '../../pages/Profile/UserProfilePage';
+import { LeaderboardPage } from '../../pages/Ranks/LeaderboardPage';
 
 function RootPage() {
   const { user, ready } = useAuthStore();
@@ -45,20 +46,11 @@ export function AppRouter() {
             <Route path="/discover" element={<DiscoverPage />} />
             <Route path="/games" element={<GamesPage />} />
             <Route path="/games/:id" element={<GameSessionPage />} />
+            <Route path="/leaderboard" element={<LeaderboardPage />} />
             <Route path="/passport" element={<PassportPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/users/:id" element={<UserProfilePage />} />
           </Route>
-          <Route
-            path="/leaderboard"
-            element={
-              <ComingSoonPage
-                title="Leaderboard"
-                phase="Phase 9"
-                summary="Global and weekly boards will use server-calculated XP. Players will be able to hide their public ranking."
-              />
-            }
-          />
           <Route
             path="/settings"
             element={

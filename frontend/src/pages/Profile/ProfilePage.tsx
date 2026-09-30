@@ -73,7 +73,7 @@ export function ProfilePage() {
           {me.country.flagEmoji} {me.country.name} · {me.email}
         </p>
         <p className="mt-1 text-sm text-mist">
-          Level {me.level} · {me.xp} XP
+          Level {me.level} · {me.rankTitle} · {me.xp} XP
         </p>
         <p className="mt-3 text-sm text-mist">
           Signup country code: {me.signupCountryIso2 ?? 'unknown'}

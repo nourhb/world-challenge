@@ -64,7 +64,8 @@ export function UserProfilePage() {
           {player.username}
         </h1>
         <p className="mt-2 text-sm text-mist">
-          {player.country.flagEmoji} {player.country.name} · Level {player.level} · {player.xp} XP
+          {player.country.flagEmoji} {player.country.name} · {player.rankTitle} · Level{' '}
+          {player.level} · {player.xp} XP
         </p>
         <p className="mt-4 text-sm leading-6 text-mist">{player.bio ?? 'No bio yet.'}</p>
         {!isSelf ? (

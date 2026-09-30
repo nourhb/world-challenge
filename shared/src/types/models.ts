@@ -21,6 +21,7 @@ export interface PublicUser {
   language: string;
   xp: number;
   level: number;
+  rankTitle: string;
   isOnline: boolean;
   country: CountrySummary;
 }
@@ -85,6 +86,8 @@ export interface GamePlayerView {
   score: number;
   ready: boolean;
   xpAwarded: number;
+  combo: number;
+  answeredThisRound: boolean;
 }
 
 export interface PublicQuestion {
@@ -96,6 +99,27 @@ export interface PublicQuestion {
   totalRounds: number;
   timeLimitMs: number;
   endsAt: string;
+  difficulty: number;
+}
+
+export interface ScoreBreakdownView {
+  basePoints: number;
+  speedBonus: number;
+  difficultyMultiplier: number;
+  combo: number;
+  comboMultiplier: number;
+  points: number;
+}
+
+export interface GameAnswerResult {
+  questionId: string;
+  accepted: boolean;
+  alreadyAnswered: boolean;
+  isCorrect: boolean;
+  points: number;
+  combo: number;
+  allPlayersAnswered: boolean;
+  breakdown: ScoreBreakdownView;
 }
 
 export interface GameSessionView {
@@ -116,11 +140,20 @@ export interface GameSessionView {
   createdAt: string;
 }
 
+export interface MatchPlayerRecap {
+  userId: string;
+  accuracy: number;
+  avgResponseMs: number;
+  peakCombo: number;
+  fastestCorrectMs: number | null;
+}
+
 export interface GameResultsView {
   sessionId: string;
   status: GameStatus;
   mode: GameMode;
   players: Array<GamePlayerView & { correctAnswers: number }>;
+  recap: MatchPlayerRecap[];
   winnerUserId: string | null;
   unlockedCountries: Array<{ userId: string; country: CountrySummary }>;
 }
@@ -128,6 +161,10 @@ export interface GameResultsView {
 export interface DiscoverUsersPage {
   items: PublicUser[];
   total: number;
+}
+
+export interface LeaderboardView {
+  items: Array<PublicUser & { rank: number }>;
 }
 
 export interface PasswordResetRequestResult {

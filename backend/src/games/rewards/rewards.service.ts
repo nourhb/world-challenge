@@ -3,6 +3,8 @@ import {
   GameMode,
   GameStatus,
   PassportStatus,
+  currentCombo,
+  peakCombo,
   type GameResultsView,
 } from '@world-challenge/shared';
 import type { Prisma } from '@prisma/client';
@@ -194,21 +196,60 @@ export class RewardsService {
         };
       };
     }>;
-    answers: Array<{ playerId: string; isCorrect: boolean }>;
+    answers: Array<{
+      playerId: string;
+      questionId: string;
+      isCorrect: boolean;
+      responseMs: number | null;
+      createdAt: Date;
+    }>;
   }): GameResultsView {
-    const players = session.players.map((player) => ({
-      userId: player.userId,
-      username: player.user.username,
-      avatarUrl: player.user.avatarUrl,
-      countryName: player.user.country.name,
-      countryFlag: player.user.country.flagEmoji,
-      score: player.score,
-      ready: player.ready,
-      xpAwarded: player.xpAwarded,
-      correctAnswers: session.answers.filter(
-        (answer) => answer.playerId === player.userId && answer.isCorrect,
-      ).length,
-    }));
+    const players = session.players.map((player) => {
+      const ordered = session.answers
+        .filter((answer) => answer.playerId === player.userId)
+        .sort((left, right) => left.createdAt.getTime() - right.createdAt.getTime());
+      return {
+        userId: player.userId,
+        username: player.user.username,
+        avatarUrl: player.user.avatarUrl,
+        countryName: player.user.country.name,
+        countryFlag: player.user.country.flagEmoji,
+        score: player.score,
+        ready: player.ready,
+        xpAwarded: player.xpAwarded,
+        combo: currentCombo(ordered.map((answer) => answer.isCorrect)),
+        answeredThisRound: false,
+        correctAnswers: ordered.filter((answer) => answer.isCorrect).length,
+      };
+    });
+
+    const recap = session.players.map((player) => {
+      const ordered = session.answers
+        .filter((answer) => answer.playerId === player.userId)
+        .sort((left, right) => left.createdAt.getTime() - right.createdAt.getTime());
+      const times = ordered
+        .map((answer) => answer.responseMs)
+        .filter((ms): ms is number => ms != null);
+      const correctTimes = ordered
+        .filter((answer) => answer.isCorrect && answer.responseMs != null)
+        .map((answer) => answer.responseMs as number);
+      return {
+        userId: player.userId,
+        accuracy:
+          ordered.length === 0
+            ? 0
+            : Math.round(
+                (ordered.filter((answer) => answer.isCorrect).length / ordered.length) *
+                  100,
+              ),
+        avgResponseMs:
+          times.length === 0
+            ? 0
+            : Math.round(times.reduce((sum, ms) => sum + ms, 0) / times.length),
+        peakCombo: peakCombo(ordered.map((answer) => answer.isCorrect)),
+        fastestCorrectMs: correctTimes.length === 0 ? null : Math.min(...correctTimes),
+      };
+    });
 
     const topScore = Math.max(0, ...players.map((player) => player.score));
     const leaders = players.filter((player) => player.score === topScore);
@@ -222,6 +263,7 @@ export class RewardsService {
       status: session.status as GameResultsView['status'],
       mode: session.mode as GameResultsView['mode'],
       players,
+      recap,
       winnerUserId,
       unlockedCountries: [],
     };

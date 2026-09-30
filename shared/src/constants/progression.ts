@@ -27,3 +27,18 @@ export const XP_REWARDS = {
   firstGameWithCountry: 50,
   badge: 100,
 } as const;
+
+export const RANK_LADDER = [
+  { minLevel: 15, title: 'Ambassador' },
+  { minLevel: 10, title: 'Consul' },
+  { minLevel: 7, title: 'Diplomat' },
+  { minLevel: 5, title: 'Envoy' },
+  { minLevel: 3, title: 'Courier' },
+  { minLevel: 1, title: 'Recruit' },
+] as const;
+
+export function rankTitle(level: number): string {
+  const safe = Number.isFinite(level) ? Math.max(1, Math.floor(level)) : 1;
+  const tier = RANK_LADDER.find((entry) => safe >= entry.minLevel);
+  return tier?.title ?? 'Recruit';
+}

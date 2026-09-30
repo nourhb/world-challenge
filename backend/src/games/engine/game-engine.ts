@@ -1,4 +1,4 @@
-import type { GameType } from '@world-challenge/shared';
+import type { GameType, ScoreBreakdownView } from '@world-challenge/shared';
 
 export interface AnswerSubmission {
   sessionId: string;
@@ -13,7 +13,15 @@ export interface AnswerResult {
   alreadyAnswered: boolean;
   isCorrect: boolean;
   points: number;
+  combo: number;
   allPlayersAnswered: boolean;
+  breakdown: ScoreBreakdownView;
+}
+
+export interface ScoredAnswer {
+  isCorrect: boolean;
+  points: number;
+  breakdown: ScoreBreakdownView;
 }
 
 export interface GameEngine {
@@ -23,5 +31,6 @@ export interface GameEngine {
     questionId: string;
     answer: string;
     responseMs: number;
-  }): Promise<{ isCorrect: boolean; points: number }>;
+    previousStreak: number;
+  }): Promise<ScoredAnswer>;
 }

@@ -1,18 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import {
+  comboMultiplier,
   MAP_CORRECT_WITHIN_KM,
   MAP_DISTANCE_SCORES,
   QUIZ_BASE_POINTS,
   QUIZ_MAX_SPEED_BONUS,
   QUIZ_TIME_LIMIT_MS,
+  type ScoreBreakdownView,
 } from '@world-challenge/shared';
 
-export interface ScoreBreakdown {
-  basePoints: number;
-  speedBonus: number;
-  difficultyMultiplier: number;
-  points: number;
-}
+export type ScoreBreakdown = ScoreBreakdownView;
 
 @Injectable()
 export class ScoringService {
@@ -20,6 +17,7 @@ export class ScoringService {
     isCorrect: boolean;
     responseMs: number;
     difficulty: number;
+    previousStreak?: number;
     timeLimitMs?: number;
   }): ScoreBreakdown {
     const timeLimitMs = input.timeLimitMs ?? QUIZ_TIME_LIMIT_MS;
@@ -32,12 +30,18 @@ export class ScoringService {
       ? Math.round(QUIZ_MAX_SPEED_BONUS * remainingRatio)
       : 0;
     const difficultyMultiplier = difficultyToMultiplier(input.difficulty);
-    const points = Math.round((basePoints + speedBonus) * difficultyMultiplier);
+    const combo = input.isCorrect ? (input.previousStreak ?? 0) + 1 : 0;
+    const comboScale = comboMultiplier(combo);
+    const points = Math.round(
+      (basePoints + speedBonus) * difficultyMultiplier * comboScale,
+    );
 
     return {
       basePoints,
       speedBonus,
       difficultyMultiplier,
+      combo,
+      comboMultiplier: comboScale,
       points,
     };
   }
@@ -46,6 +50,7 @@ export class ScoringService {
     distanceKm: number;
     responseMs: number;
     difficulty: number;
+    previousStreak?: number;
     timeLimitMs?: number;
   }): ScoreBreakdown & { isCorrect: boolean } {
     const distancePoints = distanceToPoints(input.distanceKm);
@@ -54,10 +59,14 @@ export class ScoringService {
       isCorrect,
       responseMs: input.responseMs,
       difficulty: input.difficulty,
+      previousStreak: input.previousStreak,
       timeLimitMs: input.timeLimitMs,
     });
-    const difficultyMultiplier = quiz.difficultyMultiplier;
-    const points = Math.round((distancePoints + quiz.speedBonus) * difficultyMultiplier);
+    const points = Math.round(
+      (distancePoints + quiz.speedBonus) *
+        quiz.difficultyMultiplier *
+        quiz.comboMultiplier,
+    );
     return {
       ...quiz,
       basePoints: distancePoints,
@@ -86,4 +95,15 @@ export function distanceToPoints(distanceKm: number): number {
 export function difficultyToMultiplier(difficulty: number): number {
   const clamped = Math.min(Math.max(difficulty, 1), 5);
   return 1 + (clamped - 1) * 0.25;
+}
+
+export function emptyBreakdown(): ScoreBreakdownView {
+  return {
+    basePoints: 0,
+    speedBonus: 0,
+    difficultyMultiplier: 1,
+    combo: 0,
+    comboMultiplier: 1,
+    points: 0,
+  };
 }

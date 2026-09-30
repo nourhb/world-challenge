@@ -1,5 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import type { DiscoverUsersPage, MeUser, PublicUser } from '@world-challenge/shared';
+import type {
+  DiscoverUsersPage,
+  LeaderboardView,
+  MeUser,
+  PublicUser,
+} from '@world-challenge/shared';
 import { PrismaService } from '../prisma/prisma.service';
 import { toMeUser, toPublicUser } from './user.mapper';
 import type { UpdateProfileDto } from './dto/update-profile.dto';
@@ -91,6 +96,22 @@ export class UsersService {
     return {
       items: users.map(toPublicUser),
       total,
+    };
+  }
+
+  async leaderboard(): Promise<LeaderboardView> {
+    const users = await this.prisma.user.findMany({
+      where: { deletedAt: null, isSuspended: false },
+      include: { country: true },
+      orderBy: [{ xp: 'desc' }, { level: 'desc' }, { username: 'asc' }],
+      take: 25,
+    });
+
+    return {
+      items: users.map((user, index) => ({
+        ...toPublicUser(user),
+        rank: index + 1,
+      })),
     };
   }
 

@@ -1,5 +1,5 @@
 import type { Country, User } from '@prisma/client';
-import type { CountrySummary, MeUser, PublicUser } from '@world-challenge/shared';
+import { rankTitle, type CountrySummary, type MeUser, type PublicUser } from '@world-challenge/shared';
 
 type UserWithCountry = User & { country: Country };
 
@@ -27,6 +27,7 @@ export function toPublicUser(user: UserWithCountry): PublicUser {
     language: user.language,
     xp: user.xp,
     level: user.level,
+    rankTitle: rankTitle(user.level),
     isOnline: user.isOnline,
     country: toCountrySummary(user.country),
   };

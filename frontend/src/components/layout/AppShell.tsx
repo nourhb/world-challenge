@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
+import { rankTitle } from '@world-challenge/shared';
 import { useUiStore } from '../../app/store/ui-store';
 import { useAuthStore } from '../../features/auth/auth-store';
 import { logoutAccount } from '../../services/api';
@@ -8,6 +9,7 @@ const NAV_ITEMS = [
   { to: '/', label: 'Lobby', hint: 'Home', compact: 'Lobby' },
   { to: '/discover', label: 'Players', hint: 'Discover', compact: 'Rivals' },
   { to: '/games', label: 'Arena', hint: 'Games', compact: 'Arena' },
+  { to: '/leaderboard', label: 'Ranks', hint: 'Board', compact: 'Ranks' },
   { to: '/passport', label: 'Passport', hint: 'Collection', compact: 'Book' },
   { to: '/profile', label: 'Pilot', hint: 'Profile', compact: 'Pilot' },
 ] as const;
@@ -80,7 +82,8 @@ export function AppShell() {
               <p className="text-[10px] uppercase tracking-[0.2em] text-gold">Signed in</p>
               <p className="mt-2 font-display text-lg font-bold">{user.username}</p>
               <p className="mt-1 text-xs leading-5 text-mist">
-                Lv {user.level} · {user.xp} XP · {user.country.flagEmoji} {user.country.name}
+                {user.rankTitle ?? rankTitle(user.level)} · Lv {user.level} · {user.xp} XP ·{' '}
+                {user.country.flagEmoji} {user.country.name}
               </p>
               <button
                 type="button"
@@ -117,7 +120,7 @@ export function AppShell() {
 
       <nav
         aria-label="Mobile"
-        className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 gap-1 border-t border-magenta/20 bg-panel/50 px-2 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-6 gap-1 border-t border-magenta/20 bg-panel/50 px-2 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden"
       >
         {NAV_ITEMS.map((item) => (
           <NavLink

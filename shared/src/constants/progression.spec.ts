@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { levelFromTotalXp, xpRequiredForLevel } from './progression';
+import { levelFromTotalXp, rankTitle, xpRequiredForLevel } from './progression';
 
 describe('xpRequiredForLevel', () => {
   it('uses 100 × N²', () => {
@@ -25,5 +25,14 @@ describe('levelFromTotalXp', () => {
     expect(levelFromTotalXp(400)).toBe(2);
     expect(levelFromTotalXp(899)).toBe(2);
     expect(levelFromTotalXp(900)).toBe(3);
+  });
+});
+
+describe('rankTitle', () => {
+  it('maps level bands onto diplomatic ranks', () => {
+    expect(rankTitle(1)).toBe('Recruit');
+    expect(rankTitle(3)).toBe('Courier');
+    expect(rankTitle(7)).toBe('Diplomat');
+    expect(rankTitle(15)).toBe('Ambassador');
   });
 });

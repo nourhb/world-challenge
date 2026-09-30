@@ -77,7 +77,8 @@ export function DiscoverPage() {
             >
               <p className="font-display text-xl font-bold">{player.username}</p>
               <p className="mt-1 text-sm text-mist">
-                {player.country.flagEmoji} {player.country.name} · Lv {player.level} · {player.xp} XP
+                {player.country.flagEmoji} {player.country.name} · {player.rankTitle} · Lv{' '}
+                {player.level} · {player.xp} XP
               </p>
               <p className="mt-3 text-sm text-mist">{player.bio ?? 'No bio yet.'}</p>
               <div className="mt-4 flex gap-2">

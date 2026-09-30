@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Patch, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import type { DiscoverUsersPage, MeUser, PublicUser } from '@world-challenge/shared';
+import type { DiscoverUsersPage, LeaderboardView, MeUser, PublicUser } from '@world-challenge/shared';
 import type { AuthUser } from '../common/auth/auth-user';
 import { CurrentUser } from '../common/auth/current-user.decorator';
 import { JwtAuthGuard } from '../common/auth/jwt-auth.guard';
@@ -36,6 +36,12 @@ export class UsersController {
     @Query('search') search?: string,
   ): Promise<DiscoverUsersPage> {
     return this.usersService.discover(user.userId, search);
+  }
+
+  @Get('leaderboard')
+  @ApiOperation({ summary: 'Global XP ranks from live accounts' })
+  leaderboard(): Promise<LeaderboardView> {
+    return this.usersService.leaderboard();
   }
 
   @Get(':id')

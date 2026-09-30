@@ -10,6 +10,7 @@ import type {
   GameType,
   GeoLocation,
   HealthStatus,
+  LeaderboardView,
   MeUser,
   PassportView,
   PasswordResetRequestResult,
@@ -179,6 +180,10 @@ export function updateMe(body: {
 export function getDiscoverUsers(search?: string): Promise<DiscoverUsersPage> {
   const query = search ? `?search=${encodeURIComponent(search)}` : '';
   return request<DiscoverUsersPage>(`/users${query}`);
+}
+
+export function getLeaderboard(): Promise<LeaderboardView> {
+  return request<LeaderboardView>('/users/leaderboard');
 }
 
 export function getPublicUser(id: string): Promise<PublicUser> {

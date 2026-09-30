@@ -44,7 +44,68 @@ export const QUIZ_BASE_POINTS = 100;
 export const QUIZ_MAX_SPEED_BONUS = 50;
 export const MAP_CORRECT_WITHIN_KM = 500;
 
+export const COMBO_MULTIPLIERS = {
+  1: 1,
+  2: 1.15,
+  3: 1.3,
+  4: 1.5,
+  5: 1.75,
+} as const;
+
 export function isPlayableGameType(gameType: string): boolean {
   return (PLAYABLE_GAME_TYPES as readonly string[]).includes(gameType);
+}
+
+export function comboMultiplier(combo: number): number {
+  if (combo <= 0) {
+    return 1;
+  }
+  if (combo >= 5) {
+    return COMBO_MULTIPLIERS[5];
+  }
+  return COMBO_MULTIPLIERS[combo as 1 | 2 | 3 | 4] ?? 1;
+}
+
+export function currentCombo(hits: readonly boolean[]): number {
+  let streak = 0;
+  for (let index = hits.length - 1; index >= 0; index -= 1) {
+    if (!hits[index]) {
+      break;
+    }
+    streak += 1;
+  }
+  return streak;
+}
+
+export function peakCombo(hits: readonly boolean[]): number {
+  let peak = 0;
+  let streak = 0;
+  for (const hit of hits) {
+    streak = hit ? streak + 1 : 0;
+    peak = Math.max(peak, streak);
+  }
+  return peak;
+}
+
+export function dailyChallengeType(
+  now = new Date(),
+): (typeof PLAYABLE_GAME_TYPES)[number] {
+  const day = now.toISOString().slice(0, 10);
+  let hash = 0;
+  for (let index = 0; index < day.length; index += 1) {
+    hash = (hash * 33 + day.charCodeAt(index)) >>> 0;
+  }
+  const picked = PLAYABLE_GAME_TYPES[hash % PLAYABLE_GAME_TYPES.length];
+  return picked ?? 'CULTURE_CODE';
+}
+
+export function difficultyLabel(difficulty: number): string {
+  if (difficulty >= 4) {
+    return 'Expert';
+  }
+  if (difficulty >= 3) {
+    return 'Advanced';
+  }
+  return 'Standard';
 }
 

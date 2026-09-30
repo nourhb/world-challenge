@@ -9,6 +9,7 @@ import {
   GameMode,
   GameStatus,
   GameType,
+  currentCombo,
   isPlayableGameType,
   MAP_TIME_LIMIT_MS,
   QUIZ_ROUND_COUNT,
@@ -21,6 +22,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { GameEngineFactory } from './engine/game-engine.factory';
 import type { AnswerResult } from './engine/game-engine';
 import { RewardsService } from './rewards/rewards.service';
+import { emptyBreakdown } from './scoring/scoring.service';
 import { toGameSessionView } from './session.mapper';
 import type { CreateSessionDto } from './dto/create-session.dto';
 
@@ -160,6 +162,7 @@ export class GamesService {
       include: {
         game: true,
         players: { include: { user: { include: { country: true } } } },
+        answers: true,
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -287,24 +290,37 @@ export class GamesService {
         },
       },
     });
+    const prior = await this.prisma.gameAnswer.findMany({
+      where: { sessionId, playerId: userId },
+      orderBy: { createdAt: 'asc' },
+    });
     if (existing) {
+      const combo = currentCombo(prior.map((answer) => answer.isCorrect));
       return {
         questionId,
         accepted: false,
         alreadyAnswered: true,
         isCorrect: existing.isCorrect,
         points: existing.points,
+        combo,
         allPlayersAnswered: await this.haveAllAnswered(sessionId, questionId),
+        breakdown: {
+          ...emptyBreakdown(),
+          points: existing.points,
+          combo,
+        },
       };
     }
 
     const startedAt = session.currentQuestionStartedAt ?? new Date();
     const responseMs = Math.max(0, Date.now() - startedAt.getTime());
     const engine = this.engines.getEngine(session.game.type as GameType);
+    const previousStreak = currentCombo(prior.map((answer) => answer.isCorrect));
     const scored = await engine.scoreAnswer({
       questionId,
       answer,
       responseMs,
+      previousStreak,
     });
 
     await this.prisma.$transaction([
@@ -331,7 +347,9 @@ export class GamesService {
       alreadyAnswered: false,
       isCorrect: scored.isCorrect,
       points: scored.points,
+      combo: scored.breakdown.combo,
       allPlayersAnswered: await this.haveAllAnswered(sessionId, questionId),
+      breakdown: scored.breakdown,
     };
   }
 
@@ -409,6 +427,7 @@ export class GamesService {
       include: {
         game: true,
         players: { include: { user: { include: { country: true } } } },
+        answers: true,
       },
     });
     if (!session) {
@@ -434,7 +453,7 @@ export class GamesService {
     }
     return this.prisma.question.findUnique({
       where: { id: questionId },
-      select: { id: true, prompt: true, options: true, imageUrl: true },
+      select: { id: true, prompt: true, options: true, imageUrl: true, difficulty: true },
     });
   }
 
