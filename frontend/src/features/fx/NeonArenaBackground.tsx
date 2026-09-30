@@ -22,9 +22,6 @@ export function NeonArenaBackground() {
   return (
     <div className="neon-stage" aria-hidden>
       <div className="uv-haze" />
-      <div className="uv-gyro uv-gyro-a" />
-      <div className="uv-gyro uv-gyro-b" />
-      <div className="uv-gyro uv-gyro-c" />
       {reduced ? (
         <div className="uv-static-orbits" />
       ) : (
@@ -34,7 +31,6 @@ export function NeonArenaBackground() {
           </Suspense>
         </div>
       )}
-      <div className="uv-scan" />
       <div className="uv-vignette" />
     </div>
   );

@@ -35,7 +35,6 @@ body {
   position: fixed;
   inset: 0;
   z-index: 0;
-  perspective: 1100px;
 }
 
 .neon-canvas {
@@ -51,14 +50,10 @@ body {
 
 .uv-haze {
   position: absolute;
-  inset: -12%;
+  inset: 0;
   background:
-    radial-gradient(ellipse at 18% 12%, rgba(255, 43, 214, 0.2), transparent 42%),
-    radial-gradient(ellipse at 82% 18%, rgba(139, 92, 255, 0.2), transparent 40%),
-    radial-gradient(ellipse at 50% 88%, rgba(62, 224, 197, 0.14), transparent 48%),
-    radial-gradient(ellipse at 70% 60%, rgba(242, 193, 75, 0.06), transparent 36%);
-  animation: uvDrift 16s ease-in-out infinite alternate;
-  mix-blend-mode: screen;
+    radial-gradient(ellipse at 50% 18%, rgba(62, 224, 197, 0.08), transparent 42%),
+    radial-gradient(ellipse at 80% 78%, rgba(139, 92, 255, 0.06), transparent 46%);
 }
 
 .uv-static-orbits {
@@ -70,104 +65,11 @@ body {
     radial-gradient(circle at 50% 46%, rgba(139, 92, 255, 0.12), transparent 28%);
 }
 
-.uv-gyro {
-  position: absolute;
-  left: 50%;
-  top: 46%;
-  border-radius: 50%;
-  mix-blend-mode: screen;
-  box-shadow:
-    0 0 32px rgba(62, 224, 197, 0.08),
-    inset 0 0 24px rgba(255, 43, 214, 0.06);
-}
-
-.uv-gyro-a {
-  width: min(78vw, 880px);
-  height: min(78vw, 880px);
-  border: 1px solid rgba(62, 224, 197, 0.16);
-  animation: gyroA 34s linear infinite;
-}
-
-.uv-gyro-b {
-  width: min(60vw, 680px);
-  height: min(60vw, 680px);
-  border: 1px solid rgba(255, 43, 214, 0.15);
-  animation: gyroB 23s linear infinite;
-}
-
-.uv-gyro-c {
-  width: min(44vw, 500px);
-  height: min(44vw, 500px);
-  border: 1px solid rgba(139, 92, 255, 0.18);
-  animation: gyroC 17s linear infinite;
-}
-
-.uv-scan {
-  position: absolute;
-  inset: 0;
-  opacity: 0.16;
-  mix-blend-mode: screen;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent 2px,
-    rgba(255, 43, 214, 0.09) 3px
-  );
-  animation: uvScan 7s linear infinite;
-}
-
 .uv-vignette {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at center, transparent 38%, rgba(4, 6, 12, 0.55) 78%, rgba(4, 6, 12, 0.88) 100%);
-}
-
-@keyframes uvDrift {
-  0% {
-    transform: translate3d(-2%, -1%, 0) scale(1);
-    filter: hue-rotate(0deg) saturate(1.15);
-  }
-  100% {
-    transform: translate3d(3%, 2%, 0) scale(1.08);
-    filter: hue-rotate(28deg) saturate(1.4);
-  }
-}
-
-@keyframes uvScan {
-  0% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(12px);
-  }
-}
-
-@keyframes gyroA {
-  from {
-    transform: translate(-50%, -50%) rotateX(72deg) rotateZ(0deg);
-  }
-  to {
-    transform: translate(-50%, -50%) rotateX(72deg) rotateZ(360deg);
-  }
-}
-
-@keyframes gyroB {
-  from {
-    transform: translate(-50%, -50%) rotateX(56deg) rotateY(18deg) rotateZ(0deg);
-  }
-  to {
-    transform: translate(-50%, -50%) rotateX(56deg) rotateY(18deg) rotateZ(-360deg);
-  }
-}
-
-@keyframes gyroC {
-  from {
-    transform: translate(-50%, -50%) rotateX(64deg) rotateZ(40deg);
-  }
-  to {
-    transform: translate(-50%, -50%) rotateX(64deg) rotateZ(400deg);
-  }
+    radial-gradient(circle at center, transparent 32%, rgba(4, 6, 12, 0.62) 72%, rgba(4, 6, 12, 0.92) 100%);
 }
 
 .timer-track {
@@ -200,15 +102,13 @@ body {
 
 [class*='rounded-[28px]'],
 [class*='rounded-[24px]'] {
-  backdrop-filter: blur(16px) saturate(1.25);
-  box-shadow:
-    0 0 0 1px rgba(255, 43, 214, 0.12),
-    0 0 28px rgba(62, 224, 197, 0.08);
+  backdrop-filter: blur(18px) saturate(1.1);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 .bg-panel\/80,
 .bg-panel\/70 {
-  background-color: rgb(16 26 38 / 0.46) !important;
+  background-color: rgb(16 26 38 / 0.72) !important;
 }
 
 :focus-visible {
