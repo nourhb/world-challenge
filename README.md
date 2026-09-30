@@ -83,3 +83,15 @@ npm run build
 ```
 
 Full specification: `docs/technical-spec.md`
+
+
+
+
+<img width="1920" height="1694" alt="screencapture-127-0-0-1-5180-2026-09-30-14_50_50" src="https://github.com/user-attachments/assets/6af8beac-035f-46cb-b7f9-4d7109fe9783" />
+<img width="1920" height="915" alt="screencapture-127-0-0-1-5180-discover-2026-09-30-14_51_31" src="https://github.com/user-attachments/assets/1c703424-6ee6-4e94-8a33-1cebb194c06f" />
+<img width="1920" height="1665" alt="screencapture-127-0-0-1-5180-games-2026-09-30-14_51_42" src="https://github.com/user-attachments/assets/8a063dd1-2341-4a93-9a9f-4b740ca4d412" />
+<img width="1920" height="915" alt="screencapture-127-0-0-1-5180-leaderboard-2026-09-30-14_51_55" src="https://github.com/user-attachments/assets/b5336d65-595d-4acd-96ae-285d860bafaf" />
+<img width="1920" height="1316" alt="screencapture-127-0-0-1-5180-passport-2026-09-30-14_52_04" src="https://github.com/user-attachments/assets/b72d6561-85b8-49e9-991d-66a8907d3c87" />
+<img width="1920" height="915" alt="screencapture-127-0-0-1-5180-profile-2026-09-30-14_52_20" src="https://github.com/user-attachments/assets/51402bf6-124b-4fbb-a578-09bb8eb17d4c" />
+<img width="1920" height="915" alt="screencapture-127-0-0-1-5180-games-cmuogq8360009013wglr1i952-2026-09-30-14_52_55" src="https://github.com/user-attachments/assets/0592d2a1-38ad-44e4-805c-172e07b27526" />
+
